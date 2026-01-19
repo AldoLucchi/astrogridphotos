@@ -14,7 +14,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
   title="Astro Photo Grid"
   description="A minimal, single-page photo gallery for Astro."
 >
-  {/* Auth */}
   <div id="auth-container" style="display: none;">
     <div style="
       display: flex;
@@ -73,7 +72,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
     </div>
   </div>
 
-  {/* Protected Collage */}
   <section 
     id="gallery-container" 
     class="justified-gallery" 
@@ -131,7 +129,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
   document.addEventListener('DOMContentLoaded', function() {
     const STORAGE_KEY = 'gallery_authenticated';
     
-    // Obtener elementos del DOM
     const authContainer = document.getElementById('auth-container');
     const galleryContainer = document.getElementById('gallery-container');
     const logoutButton = document.getElementById('logout-button');
@@ -141,13 +138,11 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
     
     const PASSWORD = loginForm?.dataset?.password || "01.01.2024";
     
-    // Verificar que todos los elementos existan
     if (!authContainer || !galleryContainer || !logoutButton || !loginForm || !passwordInput || !errorMessage) {
-      console.error('Error: No se encontraron todos los elementos del DOM');
+      console.error('Error: Missing DOM elements');
       return;
     }
     
-    // Verificar si ya está autenticado
     const isAuthenticated = localStorage.getItem(STORAGE_KEY) === 'true';
     
     if (isAuthenticated) {
@@ -156,15 +151,9 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       showLogin();
     }
     
-    // Manejar el envío del formulario de login
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const password = passwordInput.value.trim(); // trim para quitar espacios
-      
-      // Para debug: ver qué se está comparando
-      console.log('Fecha ingresada:', password);
-      console.log('Fecha esperada:', PASSWORD);
-      console.log('¿Coinciden?:', password === PASSWORD);
+      const password = passwordInput.value.trim();
       
       if (password === PASSWORD) {
         localStorage.setItem(STORAGE_KEY, 'true');
@@ -174,7 +163,7 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       } else {
         errorMessage.textContent = 'Date incorrect';
         passwordInput.focus();
-        passwordInput.select(); // seleccionar texto para fácil corrección
+        passwordInput.select();
       }
     });
     
@@ -215,10 +204,9 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       if (galleryContainer) galleryContainer.style.display = 'none';
       if (logoutButton) logoutButton.style.display = 'none';
       
-      // Enfocar el input de contraseña
       if (passwordInput) {
         passwordInput.focus();
-        passwordInput.value = ''; // Limpiar campo
+        passwordInput.value = '';
       }
       if (errorMessage) errorMessage.textContent = '';
     }
