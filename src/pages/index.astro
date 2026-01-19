@@ -6,13 +6,81 @@ import "@fancyapps/ui/dist/fancybox/fancybox.css";
 const images = import.meta.glob<{ default: ImageMetadata }>(
   "../images/*.{jpg,jpeg,png,webp}",
 );
+
+// 1. Obtener contraseña del .env (SOLO funciona aquí en el frontmatter)
+const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
 ---
 
 <BaseLayout
   title="Astro Photo Grid"
   description="A minimal, single-page photo gallery for Astro."
 >
-  <section class="justified-gallery" id="photoswipe">
+  {/* Auth */}
+  <div id="auth-container" style="display: none;">
+    <div style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+    ">
+      <!-- 2. Pasar la contraseña como atributo data al formulario -->
+      <form 
+        id="login-form" 
+        data-password={SERVER_PASSWORD}
+        style="
+          padding: 2rem;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          text-align: center;
+          max-width: 400px;
+          width: 90%;
+        "
+      >
+        <p style="color:black">
+          <b>Insert important date</b>
+        </p>
+        <input
+          type="text"
+          id="password-input"
+          placeholder="dd.mm.yyyy"
+          style="
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+          "
+        />
+        <p id="error-message" style="color: red; min-height: 10px; margin: 10px 0;"></p>
+        <button
+          type="submit"
+          style="
+            width: 100%;
+            padding: 12px;
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+          "
+        >
+          Open
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {/* Protected Collage */}
+  <section 
+    id="gallery-container" 
+    class="justified-gallery" 
+    style="display: none;"
+  >
     {
       Object.entries(images).map(async ([_path, image], index) => {
         const { default: imageData } = await image();
@@ -35,30 +103,133 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
       })
     }
   </section>
+
+  <button 
+    id="logout-button" 
+    style="
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: none;
+      z-index: 1000;
+      border-style: none;
+      background-image: linear-gradient(83.21deg, #3245ff, #b845ed);
+      --tw-text-opacity: 1;
+      color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    "
+  >
+    Close
+  </button>
 </BaseLayout>
 
 <script>
   import { Fancybox } from "@fancyapps/ui/dist/fancybox/";
-
-  Fancybox.bind("[data-fancybox]", {
-    theme: "auto",
-    mainStyle: {
-      "--f-button-width": "44px",
-      "--f-button-height": "44px",
-      "--f-button-border-radius": "50%",
-      "--f-toolbar-padding": "16px",
-    },
-    Carousel: {
-      Arrows: false,
-      Toolbar: {
-        display: {
-          left: [],
-          middle: [],
-          right: ["close"],
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const STORAGE_KEY = 'gallery_authenticated';
+    
+    // Obtener elementos del DOM
+    const authContainer = document.getElementById('auth-container');
+    const galleryContainer = document.getElementById('gallery-container');
+    const logoutButton = document.getElementById('logout-button');
+    const loginForm = document.getElementById('login-form');
+    const passwordInput = document.getElementById('password-input');
+    const errorMessage = document.getElementById('error-message');
+    
+    // 3. Obtener la contraseña del atributo data del formulario
+    // Si no existe, usar un valor por defecto
+    const PASSWORD = loginForm?.dataset?.password || "01.01.2024";
+    
+    // Verificar que todos los elementos existan
+    if (!authContainer || !galleryContainer || !logoutButton || !loginForm || !passwordInput || !errorMessage) {
+      console.error('Error: No se encontraron todos los elementos del DOM');
+      return;
+    }
+    
+    // Verificar si ya está autenticado
+    const isAuthenticated = localStorage.getItem(STORAGE_KEY) === 'true';
+    
+    if (isAuthenticated) {
+      showGallery();
+    } else {
+      showLogin();
+    }
+    
+    // Manejar el envío del formulario de login
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const password = passwordInput.value.trim(); // trim para quitar espacios
+      
+      // Para debug: ver qué se está comparando
+      console.log('Fecha ingresada:', password);
+      console.log('Fecha esperada:', PASSWORD);
+      console.log('¿Coinciden?:', password === PASSWORD);
+      
+      if (password === PASSWORD) {
+        localStorage.setItem(STORAGE_KEY, 'true');
+        showGallery();
+        errorMessage.textContent = '';
+        passwordInput.value = '';
+      } else {
+        errorMessage.textContent = 'Date incorrect';
+        passwordInput.focus();
+        passwordInput.select(); // seleccionar texto para fácil corrección
+      }
+    });
+    
+    // Manejar el botón de cerrar sesión
+    logoutButton.addEventListener('click', function() {
+      localStorage.removeItem(STORAGE_KEY);
+      showLogin();
+    });
+    
+    // Función para mostrar la galería
+    function showGallery() {
+      if (authContainer) authContainer.style.display = 'none';
+      if (galleryContainer) galleryContainer.style.display = 'flex';
+      if (logoutButton) logoutButton.style.display = 'block';
+      
+      // Inicializar Fancybox para la galería
+      Fancybox.bind("[data-fancybox]", {
+        theme: "auto",
+        mainStyle: {
+          "--f-button-width": "44px",
+          "--f-button-height": "44px",
+          "--f-button-border-radius": "50%",
+          "--f-toolbar-padding": "16px",
         },
-      },
-      transition: "slide",
-    },
+        Carousel: {
+          Arrows: false,
+          Toolbar: {
+            display: {
+              left: [],
+              middle: [],
+              right: ["close"],
+            },
+          },
+          transition: "slide",
+        },
+      });
+    }
+    
+    // Función para mostrar el formulario de login
+    function showLogin() {
+      if (authContainer) authContainer.style.display = 'block';
+      if (galleryContainer) galleryContainer.style.display = 'none';
+      if (logoutButton) logoutButton.style.display = 'none';
+      
+      // Enfocar el input de contraseña
+      if (passwordInput) {
+        passwordInput.focus();
+        passwordInput.value = ''; // Limpiar campo
+      }
+      if (errorMessage) errorMessage.textContent = '';
+    }
   });
 </script>
 
