@@ -2,8 +2,6 @@
 
 # Astro Photo Grid
 
-A minimal, single-page photo gallery for [Astro](https://astro.build/). See the [demo](https://astro-photo-grid.netlify.app/)!
-
 ## Features
 
 - **Responsive, justified grid using modern CSS.** All layout and reflow logic is handled with pure CSS—no JS required for positioning!
