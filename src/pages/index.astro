@@ -7,7 +7,6 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
   "../images/*.{jpg,jpeg,png,webp}",
 );
 
-// 1. Obtener contraseña del .env (SOLO funciona aquí en el frontmatter)
 const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
 ---
 
@@ -24,7 +23,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       min-height: 100vh;
       background-color: #f5f5f5;
     ">
-      <!-- 2. Pasar la contraseña como atributo data al formulario -->
       <form 
         id="login-form" 
         data-password={SERVER_PASSWORD}
@@ -141,8 +139,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
     const passwordInput = document.getElementById('password-input');
     const errorMessage = document.getElementById('error-message');
     
-    // 3. Obtener la contraseña del atributo data del formulario
-    // Si no existe, usar un valor por defecto
     const PASSWORD = loginForm?.dataset?.password || "01.01.2024";
     
     // Verificar que todos los elementos existan
@@ -182,19 +178,16 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       }
     });
     
-    // Manejar el botón de cerrar sesión
     logoutButton.addEventListener('click', function() {
       localStorage.removeItem(STORAGE_KEY);
       showLogin();
     });
     
-    // Función para mostrar la galería
     function showGallery() {
       if (authContainer) authContainer.style.display = 'none';
       if (galleryContainer) galleryContainer.style.display = 'flex';
       if (logoutButton) logoutButton.style.display = 'block';
       
-      // Inicializar Fancybox para la galería
       Fancybox.bind("[data-fancybox]", {
         theme: "auto",
         mainStyle: {
@@ -217,7 +210,6 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
       });
     }
     
-    // Función para mostrar el formulario de login
     function showLogin() {
       if (authContainer) authContainer.style.display = 'block';
       if (galleryContainer) galleryContainer.style.display = 'none';
