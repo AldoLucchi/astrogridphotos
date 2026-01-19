@@ -133,7 +133,7 @@ const SERVER_PASSWORD = import.meta.env.GALLERY_PASSWORD || "01.01.2024";
     const galleryContainer = document.getElementById('gallery-container');
     const logoutButton = document.getElementById('logout-button');
     const loginForm = document.getElementById('login-form');
-    const passwordInput = document.getElementById('password-input');
+    const passwordInput = document.getElementById('password-input') as HTMLInputElement;
     const errorMessage = document.getElementById('error-message');
     
     const PASSWORD = loginForm?.dataset?.password || "01.01.2024";
